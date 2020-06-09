@@ -63,7 +63,7 @@ router.post('/register', async (req, res) => {
       process.env.EMAIL_SECRET,
       { expiresIn: '1d' },
       (err, emailToken) => {
-        const url = `http://localhost:3000/user/confirmation/${emailToken}`;
+        const url = `https://blooming-castle-17380.herokuapp.com/user/confirmation/${emailToken}`;
 
         transporter.sendMail({
           from: process.env.HOTMAIL_USER,
