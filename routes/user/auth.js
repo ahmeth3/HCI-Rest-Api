@@ -58,21 +58,23 @@ router.post('/register', async (req, res) => {
   try {
     const savedUser = await user.save();
 
-    // await jwt.sign(
-    //   { _id: user._id },
-    //   process.env.EMAIL_SECRET,
-    //   { expiresIn: '1d' },
-    //   (err, emailToken) => {
-    //     const url = `https://blooming-castle-17380.herokuapp.com/user/confirmation/${emailToken}`;
+    await jwt.sign(
+      { _id: user._id },
+      process.env.EMAIL_SECRET,
+      { expiresIn: '1d' },
+      (err, emailToken) => {
+        const url = `https://blooming-castle-17380.herokuapp.com/user/confirmation/${emailToken}`;
 
-    //     transporter.sendMail({
-    //       from: process.env.HOTMAIL_USER,
-    //       to: user.email,
-    //       subject: 'Potvrdite email adresu',
-    //       html: `Molimo Vas kliknite ovde da biste potvrdili email adresu: <a href="${url}">${url}</a>`,
-    //     });
-    //   }
-    // );
+        transporter
+          .sendMail({
+            from: process.env.HOTMAIL_USER,
+            to: user.email,
+            subject: 'Potvrdite email adresu',
+            html: `Molimo Vas kliknite ovde da biste potvrdili email adresu: <a href="${url}">${url}</a>`,
+          })
+          .catch(err);
+      }
+    );
 
     res.send({ user: user });
   } catch (err) {
