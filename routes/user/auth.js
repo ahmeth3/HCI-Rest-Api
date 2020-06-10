@@ -130,7 +130,9 @@ router.post('/login', async (req, res) => {
     return res.status(400).send('Molim Vas potvrdite svoj mejl!');
 
   // create and assign a token
-  const token = jwt.sign({ _id: user._id }, process.env.TOKEN_SECRET);
+  const token = jwt.sign({ _id: user._id }, process.env.TOKEN_SECRET, {
+    expiresIn: '1h',
+  });
   res.header('auth-token', token).send(token);
 });
 
