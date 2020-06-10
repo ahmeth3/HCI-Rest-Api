@@ -146,7 +146,7 @@ router.get('/login/:token', async (req, res) => {
     if (!!verifiedToken) return res.status(200);
     return res.status(400);
   } catch (err) {
-    res.send(err);
+    res.status(400).send(err);
   }
 });
 
