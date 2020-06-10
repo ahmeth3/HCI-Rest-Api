@@ -121,7 +121,7 @@ router.post('/login', async (req, res) => {
   } else if (data.email) {
     user = await User.findOne({ email: data.email });
     if (!user)
-      return res.json({ status: '400', error: 'Email adresa je pogrešna' });
+      return res.status(400).json({ error: 'Email adresa je pogrešna' });
   }
 
   //check if password is correct
