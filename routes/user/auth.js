@@ -116,12 +116,10 @@ router.post('/login', async (req, res) => {
   let user;
   if (data.username) {
     user = await User.findOne({ username: data.username });
-    if (!user)
-      return res.status(400).json({ error: 'Korisničko ime je pogrešno' });
+    if (!user) return res.status(400).send('Korisničko ime je pogrešno');
   } else if (data.email) {
     user = await User.findOne({ email: data.email });
-    if (!user)
-      return res.status(400).json({ error: 'Email adresa je pogrešna' });
+    if (!user) return res.status(400).send('Email adresa je pogrešna');
   }
 
   //check if password is correct
