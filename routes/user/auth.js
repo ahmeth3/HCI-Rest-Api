@@ -110,7 +110,7 @@ router.post('/login', async (req, res) => {
   } else if (data.email) {
     ({ error } = loginWithEmailValidation(data));
   }
-  if (error) return res.status(400).json({ error: error.details[0].message });
+  if (error) return res.status(400).send(error.details[0].message);
 
   // check if the username/email already exists
   let user;
