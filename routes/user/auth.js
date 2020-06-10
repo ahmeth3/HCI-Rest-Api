@@ -131,9 +131,23 @@ router.post('/login', async (req, res) => {
 
   // create and assign a token
   const token = jwt.sign({ _id: user._id }, process.env.TOKEN_SECRET, {
-    expiresIn: '1h',
+    expiresIn: 1,
   });
   res.header('auth-token', token).send(token);
+});
+
+// Try login with token
+router.get('/login/:token', async (req, res) => {
+  try {
+    const verifiedToken = jwt.verify(
+      req.params.token,
+      process.env.TOKEN_SECRET
+    );
+    if (!!verifiedToken) return res.status(200);
+    return res.status(400);
+  } catch (err) {
+    res.send(err);
+  }
 });
 
 module.exports = router;
