@@ -11,7 +11,11 @@ const {
   loginWithUsernameValidation,
   loginWithEmailValidation,
 } = require('../../validators/authValidator');
+
 const User = require('../../models/User');
+
+const { createProfessor } = require('./professor/professor.js');
+const { createStudent } = require('./student/student.js');
 
 const transporter = nodemailer.createTransport({
   service: 'hotmail',
@@ -57,6 +61,24 @@ router.post('/register', async (req, res) => {
 
   try {
     const savedUser = await user.save();
+
+    // create a record of this user in Student or Professor table according to his account_type
+    if (user.account_type === 'Student') {
+      await createStudent({
+        studentIdNo: '',
+        department: '',
+        profile: '',
+        grade: '',
+        user: user._id,
+      });
+    }
+    if (user.account_type === 'Profesor') {
+      await createProfessor({
+        department: '',
+        profile: '',
+        user: user._id,
+      });
+    }
 
     await jwt.sign(
       { _id: user._id },

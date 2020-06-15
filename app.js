@@ -5,6 +5,9 @@ const mongoose = require('mongoose');
 
 // Import routes
 const authRoute = require('./routes/user/auth');
+const studentRoute = require('./routes/user/student/student');
+const professorRoute = require('./routes/user/professor/professor');
+const subjectRoute = require('./routes/subject/subject');
 
 // Middlewares
 dotenv.config();
@@ -12,6 +15,9 @@ app.use(express.json());
 
 // Route Middlewares
 app.use('/user', authRoute);
+app.use('/student', studentRoute);
+app.use('/professor', professorRoute);
+app.use('/subject', subjectRoute);
 
 // Connect to DB
 mongoose.connect(
@@ -20,7 +26,7 @@ mongoose.connect(
   () => console.log('Connection to DB successful!')
 );
 
-const PORT = process.env.PORT || 3000
+const PORT = process.env.PORT || 3000;
 
 // Runs the server on port 3000
 app.listen(PORT, () => console.log('Server is up and running!'));
