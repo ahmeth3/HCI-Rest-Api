@@ -122,7 +122,7 @@ router.get('/basic-info/:user', async (req, res) => {
   if (basicInfoExist) {
     if (basicInfoExist.department != '')
       return res.status(200).send('Ima basic info');
-    else return res.status(400).send('Nema basic info');
+    else return res.status(200).send('Nema basic info');
   }
   return res.status(400);
 });
