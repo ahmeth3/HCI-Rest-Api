@@ -116,5 +116,16 @@ router.patch('/update-subjects', async (req, res) => {
   }
 });
 
+// Get student's basic information existence
+router.get('/basic-info/:user', async (req, res) => {
+  const basicInfoExist = await Student.findOne({ user: req.params.user });
+  if (basicInfoExist) {
+    if (basicInfoExist.department != '')
+      return res.status(200).send('Ima basic info');
+    else return res.status(400).send('Nema basic info');
+  }
+  return res.status(400);
+});
+
 module.exports = router;
 module.exports.createStudent = createStudent;
