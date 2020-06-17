@@ -40,6 +40,24 @@ router.post('/create', async (req, res) => {
   }
 });
 
+// Get all of the subjects based on department, profile, grade
+router.post('/fetchByCriteria', async (req, res) => {
+  // extract the data
+  data = req.body;
+
+  try {
+    const subjects = await Subject.find({
+      department: data.department,
+      profile: data.profile,
+      grade: data.grade,
+    });
+
+    res.status(200).send(subjects);
+  } catch (err) {
+    res.status(400).send(err);
+  }
+});
+
 const addProfessorsToSubject = async function (data) {
   try {
     const updatedSubject = await Subject.updateOne(
