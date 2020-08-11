@@ -1,4 +1,9 @@
 const router = require('express').Router();
+const jwt = require('jsonwebtoken');
+const dotenv = require('dotenv');
+const mongoose = require('mongoose');
+
+dotenv.config();
 
 const Student = require('../../../models/Student');
 
@@ -9,6 +14,7 @@ const {
 
 const {
   addStudentsToSubject,
+  removeStudentFromSubject,
   getSubjectsName,
 } = require('../../subject/subject');
 
@@ -57,7 +63,19 @@ router.patch('/update', async (req, res) => {
 });
 
 // Update students subjects
-router.patch('/update-subjects', async (req, res) => {
+router.patch('/update-subjects/:token', async (req, res) => {
+  var userId = mongoose.Types.ObjectId;
+  try {
+    const verifiedToken = jwt.verify(
+      req.params.token,
+      process.env.TOKEN_SECRET
+    );
+
+    userId = mongoose.Types.ObjectId(verifiedToken._id);
+  } catch (err) {
+    return res.status(400).send('Istekao token!');
+  }
+
   // Extract the data
   data = req.body;
 
@@ -66,47 +84,36 @@ router.patch('/update-subjects', async (req, res) => {
   if (error) return res.status(400).send(error.details[0].message);
 
   // Checking if the user with that userID is in student table
-  const studentExists = await Student.findOne({ user: data.user });
+  const studentExists = await Student.findOne({ user: userId });
   if (!studentExists)
     return res.status(400).send('Korisnik sa tim id nije student!');
 
-  // Array that stores the subjects that student already has (used for displaying error message to user)
-  var subjectExist = [];
-
-  // for loop that stores subjects that user already has in database in subjectExist array
-  for (i = 0; i < data.subjects.length; i++) {
-    const subjectExists = await Student.findOne({
-      user: data.user,
-      subjects: data.subjects[i],
-    });
-
-    if (!!subjectExists) {
-      subjectName = await getSubjectsName({ _id: data.subjects[i] });
-      subjectExist.push(subjectName);
-    }
-  }
-
-  // Error message that gives information about which subjects user already has entered
-  if (subjectExist.length > 0) {
-    return res
-      .status(400)
-      .send('Već ste aktivni na predmetima: ' + subjectExist.toString());
-  }
-
   try {
+    var subjects = await Student.find(
+      { user: userId },
+      { _id: 0, subjects: 1 }
+    );
+
+    subjects = subjects[0].subjects;
+
     const updatedStudent = await Student.updateOne(
-      { user: data.user },
+      { user: userId },
       {
-        $push: {
-          subjects: { $each: data.subjects },
-        },
+        subjects: data.subjects,
       }
     );
+
+    for (i = 0; i < subjects.length; i++) {
+      await removeStudentFromSubject({
+        _id: subjects[i],
+        students: userId,
+      });
+    }
 
     for (i = 0; i < data.subjects.length; i++) {
       await addStudentsToSubject({
         _id: data.subjects[i],
-        students: [data.user],
+        students: [userId],
       });
     }
 

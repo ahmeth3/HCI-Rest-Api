@@ -6,7 +6,6 @@ const updateBasicStudentValidation = (data) => {
     department: Joi.string().required(),
     profile: Joi.string().required(),
     grade: Joi.string().required(),
-    user: Joi.required(),
   };
 
   return Joi.validate(data, schema);
@@ -14,7 +13,6 @@ const updateBasicStudentValidation = (data) => {
 
 const updateStudentsSubjectsValidation = (data) => {
   const schema = {
-    user: Joi.required(),
     subjects: Joi.required(),
   };
 

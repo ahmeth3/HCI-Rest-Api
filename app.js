@@ -8,6 +8,7 @@ const authRoute = require('./routes/user/auth');
 const studentRoute = require('./routes/user/student/student');
 const professorRoute = require('./routes/user/professor/professor');
 const subjectRoute = require('./routes/subject/subject');
+const consultationRoute = require('./routes/consultation/consultation');
 
 // Middlewares
 dotenv.config();
@@ -18,6 +19,7 @@ app.use('/user', authRoute);
 app.use('/student', studentRoute);
 app.use('/professor', professorRoute);
 app.use('/subject', subjectRoute);
+app.use('/consultation', consultationRoute);
 
 // Connect to DB
 mongoose.connect(

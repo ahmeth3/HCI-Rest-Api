@@ -12,7 +12,6 @@ const updateBasicProfessorValidation = (data) => {
 
 const updateProfessorsSubjectsValidation = (data) => {
   const schema = {
-    user: Joi.required(),
     subjects: Joi.required(),
   };
 

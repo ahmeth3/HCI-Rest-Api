@@ -12,10 +12,15 @@ const {
   loginWithEmailValidation,
 } = require('../../validators/authValidator');
 
+const {
+  updateBasicStudentValidation,
+} = require('../../validators/studentValidator');
+
 const User = require('../../models/User');
 
 const { createProfessor } = require('./professor/professor.js');
 const { createStudent } = require('./student/student.js');
+const Student = require('../../models/Student');
 
 const transporter = nodemailer.createTransport({
   service: 'hotmail',
@@ -27,9 +32,42 @@ const transporter = nodemailer.createTransport({
 
 // Register
 router.post('/register', async (req, res) => {
+  // extract the data
+  data = {
+    username: req.body.username,
+    password: req.body.password,
+    email: req.body.email,
+    name: req.body.name,
+    surname: req.body.surname,
+    DoB: req.body.DoB,
+    JMBG: req.body.JMBG,
+    phone_number: req.body.phone_number,
+    account_type: req.body.account_type,
+  };
+
   // validate the data before adding the user
-  const { error } = registerValidation(req.body);
+  const { error } = registerValidation(data);
   if (error) return res.status(400).send(error.details[0].message);
+
+  // validate the data related to student before adding the user, and student later
+  var studentData;
+  if (data.account_type === 'Student') {
+    studentData = {
+      studentIdNo: req.body.studentIdNo,
+      department: req.body.department,
+      profile: req.body.profile,
+      grade: req.body.grade,
+    };
+
+    const studentIdNoExists = await Student.findOne({
+      studentIdNo: studentData.studentIdNo,
+    });
+    if (studentIdNoExists)
+      return res.status(400).send('Taj broj indeksa već postoji!');
+
+    const { error } = updateBasicStudentValidation(studentData);
+    if (error) return res.status(400).send(error.details[0].message);
+  }
 
   // checking if the user with that email, username or jmbg is already in database
   const emailExists = await User.findOne({ email: req.body.email });
@@ -65,13 +103,14 @@ router.post('/register', async (req, res) => {
     // create a record of this user in Student or Professor table according to his account_type
     if (user.account_type === 'Student') {
       await createStudent({
-        studentIdNo: '',
-        department: '',
-        profile: '',
-        grade: '',
+        studentIdNo: studentData.studentIdNo,
+        department: studentData.department,
+        profile: studentData.profile,
+        grade: studentData.grade,
         user: user._id,
       });
     }
+
     if (user.account_type === 'Profesor') {
       await createProfessor({
         department: '',
@@ -104,6 +143,7 @@ router.post('/register', async (req, res) => {
   }
 });
 
+// Email confirmation
 router.get('/confirmation/:emailToken', async (req, res) => {
   try {
     const decodedToken = jwt.verify(
@@ -153,9 +193,10 @@ router.post('/login', async (req, res) => {
 
   // create and assign a token
   const token = jwt.sign({ _id: user._id }, process.env.TOKEN_SECRET, {
-    expiresIn: '1h',
+    expiresIn: '24h',
   });
-  res.header('auth-token', token).send(user);
+
+  res.header('auth_token', token).send(user);
 });
 
 // Try login with token
@@ -165,6 +206,7 @@ router.post('/login/:token', async (req, res) => {
       req.params.token,
       process.env.TOKEN_SECRET
     );
+
     return res.status(200).send();
   } catch (err) {
     res.status(400).send();
