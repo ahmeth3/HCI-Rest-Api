@@ -196,7 +196,8 @@ router.post('/login', async (req, res) => {
     expiresIn: '24h',
   });
 
-  res.header('auth_token', token).send(user);
+  // res.header('auth_token', token).send(user);
+  res.status(200).send(token);
 });
 
 // Try login with token
