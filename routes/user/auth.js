@@ -40,8 +40,6 @@ router.post('/register', async (req, res) => {
     name: req.body.name,
     surname: req.body.surname,
     DoB: req.body.DoB,
-    JMBG: req.body.JMBG,
-    phone_number: req.body.phone_number,
     account_type: req.body.account_type,
   };
 
@@ -76,10 +74,6 @@ router.post('/register', async (req, res) => {
   const usernameExists = await User.findOne({ username: req.body.username });
   if (usernameExists) return res.status(400).send('Korisničko ime je zauzeto!');
 
-  const jmbgExists = await User.findOne({ JMBG: req.body.JMBG });
-  if (jmbgExists)
-    return res.status(400).send('Korisnik sa unetim JMBG već postoji!');
-
   // hash the password
   const salt = await bcrypt.genSalt(10);
   const hashedPassword = await bcrypt.hash(req.body.password, salt);
@@ -92,8 +86,6 @@ router.post('/register', async (req, res) => {
     name: req.body.name,
     surname: req.body.surname,
     DoB: req.body.DoB,
-    JMBG: req.body.JMBG,
-    phone_number: req.body.phone_number,
     account_type: req.body.account_type,
   });
 

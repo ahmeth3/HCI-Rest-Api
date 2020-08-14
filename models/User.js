@@ -33,16 +33,6 @@ const userSchema = new mongoose.Schema({
     type: Date,
     required: true,
   },
-  JMBG: {
-    type: String,
-    required: true,
-    min: 13,
-    max: 13,
-  },
-  phone_number: {
-    type: String,
-    required: true,
-  },
   account_type: {
     type: String,
     required: true,

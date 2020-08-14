@@ -9,8 +9,6 @@ const registerValidation = (data) => {
     name: Joi.string().required(),
     surname: Joi.string().required(),
     DoB: Joi.date().required(),
-    JMBG: Joi.string().required().length(13),
-    phone_number: Joi.string().required(),
     account_type: Joi.string().required(),
   };
 
