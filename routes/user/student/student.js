@@ -124,14 +124,24 @@ router.patch('/update-subjects/:token', async (req, res) => {
 });
 
 // Get student's basic information existence
-router.get('/basic-info/:user', async (req, res) => {
-  const basicInfoExist = await Student.findOne({ user: req.params.user });
-  if (basicInfoExist) {
-    if (basicInfoExist.department != '')
+router.get('/basic-info/:token', async (req, res) => {
+  try {
+    const verifiedToken = jwt.verify(
+      req.params.token,
+      process.env.TOKEN_SECRET
+    );
+
+    var userId = mongoose.Types.ObjectId;
+    userId = mongoose.Types.ObjectId(verifiedToken._id);
+
+    const basicInfoExist = await Student.findOne({ user: userId });
+
+    if (basicInfoExist.subjects.length > 0)
       return res.status(200).send('Ima basic info');
     else return res.status(200).send('Nema basic info');
+  } catch (err) {
+    res.status(400).send(err);
   }
-  return res.status(400);
 });
 
 module.exports = router;
