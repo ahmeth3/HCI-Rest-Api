@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const nodemailer = require('nodemailer');
 const dotenv = require('dotenv');
+const mongoose = require('mongoose');
 
 dotenv.config();
 
@@ -34,9 +35,8 @@ const transporter = nodemailer.createTransport({
 router.post('/register', async (req, res) => {
   // extract the data
   data = {
-    username: req.body.username,
-    password: req.body.password,
     email: req.body.email,
+    password: req.body.password,
     name: req.body.name,
     surname: req.body.surname,
     DoB: req.body.DoB,
@@ -71,16 +71,12 @@ router.post('/register', async (req, res) => {
   const emailExists = await User.findOne({ email: req.body.email });
   if (emailExists) return res.status(400).send('Email adresa je zauzeta!');
 
-  const usernameExists = await User.findOne({ username: req.body.username });
-  if (usernameExists) return res.status(400).send('Korisničko ime je zauzeto!');
-
   // hash the password
   const salt = await bcrypt.genSalt(10);
   const hashedPassword = await bcrypt.hash(req.body.password, salt);
 
   // create new user
   const user = new User({
-    username: req.body.username,
     password: hashedPassword,
     email: req.body.email,
     name: req.body.name,
@@ -200,9 +196,16 @@ router.post('/login/:token', async (req, res) => {
       process.env.TOKEN_SECRET
     );
 
-    return res.status(200).send();
+    var userId = mongoose.Types.ObjectId;
+
+    userId = mongoose.Types.ObjectId(verifiedToken._id);
+
+    const basicInfoExist = await User.findOne({ _id: userId });
+    if (basicInfoExist)
+      return res.status(200).send(basicInfoExist.account_type);
+    else res.status(400).send('bog majku');
   } catch (err) {
-    res.status(400).send();
+    res.status(400).send(err);
   }
 });
 
