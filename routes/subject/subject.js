@@ -1,9 +1,16 @@
 const router = require('express').Router();
+const jwt = require('jsonwebtoken');
+const dotenv = require('dotenv');
+const mongoose = require('mongoose');
+
+dotenv.config();
 
 const {
   createSubjectValidation,
 } = require('../../validators/subjectValidator');
 const Subject = require('../../models/Subject');
+const User = require('../../models/User');
+const Student = require('../../models/Student');
 
 // Create
 router.post('/create', async (req, res) => {
@@ -42,16 +49,34 @@ router.post('/create', async (req, res) => {
   }
 });
 
-// Get all of the subjects based on department, profile, grade
-router.post('/fetchByCriteria', async (req, res) => {
-  // extract the data
-  data = req.body;
-
+// Get all of the subjects for Student
+router.post('/fetchByCriteriaStudent/:token', async (req, res) => {
   try {
+    const verifiedToken = jwt.verify(
+      req.params.token,
+      process.env.TOKEN_SECRET
+    );
+
+    var userId = mongoose.Types.ObjectId;
+    userId = mongoose.Types.ObjectId(verifiedToken._id);
+
+    const student = await Student.findOne({ user: userId });
+    if (!student) {
+      res.status(400).send('Nema takvog studenta!');
+    }
+
+    /* 
+    For initial loading subjects will be fetched based on student's grade in database
+    If that is not the case, then the grade criteria will be passed within the request
+    */
+    let gradeCriteria;
+    if (req.body.grade != '0.') gradeCriteria = req.body.grade;
+    else gradeCriteria = student.grade;
+
     const subjects = await Subject.find({
-      department: data.department,
-      profile: data.profile,
-      grade: data.grade,
+      department: { $elemMatch: { $eq: student.department } },
+      profile: { $elemMatch: { $eq: student.profile } },
+      grade: { $elemMatch: { $eq: gradeCriteria } },
     });
 
     res.status(200).send(subjects);

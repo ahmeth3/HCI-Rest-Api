@@ -203,7 +203,7 @@ router.post('/login/:token', async (req, res) => {
     const basicInfoExist = await User.findOne({ _id: userId });
     if (basicInfoExist)
       return res.status(200).send(basicInfoExist.account_type);
-    else res.status(400).send('bog majku');
+    else res.status(400).send('');
   } catch (err) {
     res.status(400).send(err);
   }
