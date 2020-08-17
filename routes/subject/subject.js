@@ -11,6 +11,7 @@ const {
 const Subject = require('../../models/Subject');
 const User = require('../../models/User');
 const Student = require('../../models/Student');
+const Professor = require('../../models/Professor');
 
 // Create
 router.post('/create', async (req, res) => {
@@ -77,6 +78,28 @@ router.post('/fetchByCriteriaStudent/:token', async (req, res) => {
       department: { $elemMatch: { $eq: student.department } },
       profile: { $elemMatch: { $eq: student.profile } },
       grade: { $elemMatch: { $eq: gradeCriteria } },
+    });
+
+    res.status(200).send(subjects);
+  } catch (err) {
+    res.status(400).send(err);
+  }
+});
+
+// Get all of the subjects for Professor
+router.post('/fetchByCriteriaProfessor/:token', async (req, res) => {
+  try {
+    const verifiedToken = jwt.verify(
+      req.params.token,
+      process.env.TOKEN_SECRET
+    );
+
+    data = req.body;
+
+    const subjects = await Subject.find({
+      department: { $elemMatch: { $eq: data.department } },
+      profile: { $elemMatch: { $eq: data.profile } },
+      grade: { $elemMatch: { $eq: data.grade } },
     });
 
     res.status(200).send(subjects);
