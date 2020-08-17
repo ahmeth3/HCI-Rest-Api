@@ -27,7 +27,7 @@ const loginWithUsernameValidation = (data) => {
 const loginWithEmailValidation = (data) => {
   schema = {
     email: Joi.string().required().email(),
-    password: Joi.string().required().min(6).alphanum(),
+    password: Joi.string().required(),
   };
   return Joi.validate(data, schema);
 };
