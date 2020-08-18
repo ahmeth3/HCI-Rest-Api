@@ -80,7 +80,7 @@ router.post('/fetchByCriteriaStudent/:token', async (req, res) => {
       grade: { $elemMatch: { $eq: gradeCriteria } },
     });
 
-    res.status(200).send(subjects);
+    res.status(200).send({ subjects: subjects, grade: gradeCriteria });
   } catch (err) {
     res.status(400).send(err);
   }
