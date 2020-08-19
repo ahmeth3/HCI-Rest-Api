@@ -6,6 +6,7 @@ const mongoose = require('mongoose');
 dotenv.config();
 
 const Student = require('../../../models/Student');
+const Subject = require('../../../models/Subject');
 
 const {
   updateBasicStudentValidation,
@@ -139,6 +140,25 @@ router.get('/basic-info/:token', async (req, res) => {
     if (basicInfoExist.subjects.length > 0)
       return res.status(200).send('Ima basic info');
     else return res.status(200).send('Nema basic info');
+  } catch (err) {
+    res.status(400).send(err);
+  }
+});
+
+// Get professor' subjects
+router.get('/mySubjects/:token', async (req, res) => {
+  try {
+    const verifiedToken = jwt.verify(
+      req.params.token,
+      process.env.TOKEN_SECRET
+    );
+
+    var userId = mongoose.Types.ObjectId;
+    userId = mongoose.Types.ObjectId(verifiedToken._id);
+
+    const mySubjects = await Subject.find({ students: userId });
+    if (mySubjects) res.status(200).send(mySubjects);
+    else res.status(400).send('Nema predmeta!');
   } catch (err) {
     res.status(400).send(err);
   }
