@@ -1,9 +1,21 @@
 const mongoose = require('mongoose');
 
 const consultationSchema = new mongoose.Schema({
-  place: {
+  typeOFDate: {
     type: String,
     required: true,
+  },
+  day: {
+    type: String,
+    required: false,
+  },
+  repeatEveryWeek: {
+    type: Boolean,
+    required: false,
+  },
+  date: {
+    type: Date,
+    required: false,
   },
   startTime: {
     type: String,
@@ -13,21 +25,11 @@ const consultationSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  repeatEveryWeek: {
-    type: Boolean,
+  place: {
+    type: String,
     required: true,
-    default: false,
   },
-  day: {
-    type: String,
-    required: false,
-  },
-  date: {
-    type: String,
-    required: false,
-  },
-  // pri svakom getu da se date poveca za 7, i prisutni se stave na default
-  professors: { type: mongoose.Schema.Types.ObjectId, ref: 'Professor' },
+  professor: { type: mongoose.Schema.Types.ObjectId, ref: 'Professor' },
 });
 
 module.exports = mongoose.model('Consultation', consultationSchema);

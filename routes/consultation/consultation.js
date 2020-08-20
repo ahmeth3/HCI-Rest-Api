@@ -1,42 +1,96 @@
 const router = require('express').Router();
+const jwt = require('jsonwebtoken');
+const dotenv = require('dotenv');
+const mongoose = require('mongoose');
+
+dotenv.config();
 
 const Consultation = require('../../models/Consultation');
+const Subject = require('../../models/Subject');
+const Professor = require('../../models/Professor');
+const Student = require('../../models/Student');
 
 // Create
-router.post('/create', async (req, res) => {
-    // extract the data
+router.post('/create/:token', async (req, res) => {
+  try {
+    // verify the token
+    const verifiedToken = jwt.verify(
+      req.params.token,
+      process.env.TOKEN_SECRET
+    );
+
+    // extract the user id from token
+    var userId = mongoose.Types.ObjectId;
+    userId = mongoose.Types.ObjectId(verifiedToken._id);
+
     data = req.body;
-  
-    // validate the data before adding the subject
-    const { error } = createSubjectValidation(data);
-    if (error) return res.status(400).send(error.details[0].message);
-  
-    // checking if the subject aleady exists
-    const subjectExists = await Subject.findOne({
-      department: data.department,
-      profile: data.profile,
-      grade: data.grade,
-      name: data.name,
-      description: data.description,
-    });
-    if (subjectExists) return res.status(400).send('Predmet već postoji!');
-  
-    // create new subject
-    const subject = new Subject({
-      department: data.department,
-      profile: data.profile,
-      grade: data.grade,
-      name: data.name,
-      description: data.description,
-    });
-  
-    try {
-      const savedSubject = await subject.save();
-  
-      res.send({ subject: savedSubject });
-    } catch (err) {
-      res.status(400).send(err);
+
+    // check if user has already created consultation within the time range
+    if (data.typeOFDate == 'day') {
+      const cons = await Consultation.find({
+        day: data.day,
+        professor: userId,
+      });
+
+      if (cons) {
+        var errorMessages = [];
+        for (var i = 0; i < cons.length; i++) {
+          var startTime = cons[i].startTime.split(':');
+          var startTimeHour = startTime[0];
+          var startTimeMinute = startTime[1];
+
+          var startTimeMinutes =
+            parseInt(startTimeHour) * 60 + parseInt(startTimeMinute);
+
+          var endTime = cons[i].endTime.split(':');
+          var endTimeHour = endTime[0];
+          var endTimeMinute = endTime[1];
+
+          var endTimeMinutes =
+            parseInt(endTimeHour) * 60 + parseInt(endTimeMinute);
+
+          var testedConsTime = data.startTime.split(':');
+          var testedConsTimeHour = testedConsTime[0];
+          var testedConsTimeMinute = testedConsTime[1];
+
+          var testedConsTimeMinutes =
+            parseInt(testedConsTimeHour) * 60 + parseInt(testedConsTimeMinute);
+
+          if (
+            (testedConsTimeMinutes >= startTimeMinutes &&
+              testedConsTimeMinutes < endTimeMinutes) ||
+            (testedConsTimeMinutes > startTimeMinutes - 120 &&
+              testedConsTimeMinutes <= startTimeMinutes)
+          )
+            errorMessages.push(
+              'Već imate konsultaciju tog dana u periodu od ' +
+                cons[i].startTime +
+                '-' +
+                cons[i].endTime
+            );
+        }
+        if (errorMessages.length > 0)
+          return res.status(400).send(errorMessages);
+      }
     }
-  });
+
+    const consulation = new Consultation({
+      typeOFDate: data.typeOFDate,
+      day: data.day,
+      repeatEveryWeek: data.repeatEveryWeek,
+      date: data.date,
+      startTime: data.startTime,
+      endTime: data.endTime,
+      place: data.place,
+      professor: userId,
+    });
+
+    const savedConsultation = await consulation.save();
+
+    res.status(200).send(savedConsultation);
+  } catch (err) {
+    res.status(400).send(err);
+  }
+});
 
 module.exports = router;
