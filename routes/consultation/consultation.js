@@ -110,7 +110,7 @@ router.get('/professor/:token', async (req, res) => {
       professor: userId,
     });
 
-    if (consultation) return res.status(200).send(consultation);
+    if (consultation) return res.status(200).send({ data: consultation });
     else return res.status(200).send('Nemate konsultacija!');
   } catch (err) {
     res.status(400).send(err);
