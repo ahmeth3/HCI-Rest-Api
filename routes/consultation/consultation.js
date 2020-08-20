@@ -93,4 +93,28 @@ router.post('/create/:token', async (req, res) => {
   }
 });
 
+// Get consultations for professor
+router.get('/professor/:token', async (req, res) => {
+  try {
+    // verify the token
+    const verifiedToken = jwt.verify(
+      req.params.token,
+      process.env.TOKEN_SECRET
+    );
+
+    // extract the user id from token
+    var userId = mongoose.Types.ObjectId;
+    userId = mongoose.Types.ObjectId(verifiedToken._id);
+
+    const consultation = await Consultation.find({
+      professor: userId,
+    });
+
+    if (consultation) return res.status(200).send(consultation);
+    else return res.status(200).send('Nemate konsultacija!');
+  } catch (err) {
+    res.status(400).send(err);
+  }
+});
+
 module.exports = router;
