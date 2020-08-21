@@ -28,7 +28,7 @@ router.post('/create/:token', async (req, res) => {
     // check if user has already created consultation within the time range
     if (data.typeOFDate == 'day') {
       const cons = await Consultation.find({
-        day: data.day,
+        date: data.date,
         professor: userId,
       });
 
