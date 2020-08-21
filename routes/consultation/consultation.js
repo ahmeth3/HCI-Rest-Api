@@ -26,49 +26,47 @@ router.post('/create/:token', async (req, res) => {
     data = req.body;
 
     // check if user has already created consultation within the time range
-    if (data.typeOFDate == 'day') {
-      const cons = await Consultation.find({
-        date: data.date,
-        professor: userId,
-      });
+    const cons = await Consultation.find({
+      date: data.date,
+      professor: userId,
+    });
 
-      if (cons) {
-        var errorMessages = [];
-        for (var i = 0; i < cons.length; i++) {
-          var startTime = cons[i].startTime.split(':');
-          var startTimeHour = startTime[0];
-          var startTimeMinute = startTime[1];
+    if (cons) {
+      var errorMessages = [];
+      for (var i = 0; i < cons.length; i++) {
+        var startTime = cons[i].startTime.split(':');
+        var startTimeHour = startTime[0];
+        var startTimeMinute = startTime[1];
 
-          var startTimeMinutes =
-            parseInt(startTimeHour) * 60 + parseInt(startTimeMinute);
+        var startTimeMinutes =
+          parseInt(startTimeHour) * 60 + parseInt(startTimeMinute);
 
-          var endTime = cons[i].endTime.split(':');
-          var endTimeHour = endTime[0];
-          var endTimeMinute = endTime[1];
+        var endTime = cons[i].endTime.split(':');
+        var endTimeHour = endTime[0];
+        var endTimeMinute = endTime[1];
 
-          var endTimeMinutes =
-            parseInt(endTimeHour) * 60 + parseInt(endTimeMinute);
+        var endTimeMinutes =
+          parseInt(endTimeHour) * 60 + parseInt(endTimeMinute);
 
-          var testedConsTime = data.startTime.split(':');
-          var testedConsTimeHour = testedConsTime[0];
-          var testedConsTimeMinute = testedConsTime[1];
+        var testedConsTime = data.startTime.split(':');
+        var testedConsTimeHour = testedConsTime[0];
+        var testedConsTimeMinute = testedConsTime[1];
 
-          var testedConsTimeMinutes =
-            parseInt(testedConsTimeHour) * 60 + parseInt(testedConsTimeMinute);
+        var testedConsTimeMinutes =
+          parseInt(testedConsTimeHour) * 60 + parseInt(testedConsTimeMinute);
 
-          if (
-            (testedConsTimeMinutes >= startTimeMinutes &&
-              testedConsTimeMinutes < endTimeMinutes) ||
-            (testedConsTimeMinutes > startTimeMinutes - 120 &&
-              testedConsTimeMinutes <= startTimeMinutes)
-          )
-            errorMessages.push(
-              'Već imate konsultaciju tog dana u periodu od ' +
-                cons[i].startTime +
-                '-' +
-                cons[i].endTime
-            );
-        }
+        if (
+          (testedConsTimeMinutes >= startTimeMinutes &&
+            testedConsTimeMinutes < endTimeMinutes) ||
+          (testedConsTimeMinutes > startTimeMinutes - 120 &&
+            testedConsTimeMinutes <= startTimeMinutes)
+        )
+          errorMessages.push(
+            'Već imate konsultaciju tog dana u periodu od ' +
+              cons[i].startTime +
+              '-' +
+              cons[i].endTime
+          );
         if (errorMessages.length > 0)
           return res.status(400).send(errorMessages);
       }
