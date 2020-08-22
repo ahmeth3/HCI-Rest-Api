@@ -234,6 +234,7 @@ router.get('/student/:token', async (req, res) => {
 
     var studentsProfessors = [];
 
+    //getam profesore
     for (var i = 0; i < studentsSubjects.length; i++) {
       for (var j = 0; j < studentsSubjects[i].professors.length; j++)
         if (
@@ -246,6 +247,7 @@ router.get('/student/:token', async (req, res) => {
 
     var studentsConsultations = [];
 
+    //stavljam sve kons mojih prof
     for (var i = 0; i < studentsProfessors.length; i++) {
       const profCons = await Consultation.find({
         professor: studentsProfessors[i],
@@ -258,17 +260,15 @@ router.get('/student/:token', async (req, res) => {
 
     var consultations = [];
 
+    var myConsCounter = -1;
     for (var i = 0; i < studentsConsultations.length; i++) {
       const prof = await User.findOne({
         _id: studentsConsultations[i].professor,
       });
 
-      var myConsCounter = -1;
-      // check if im already signed up for this cons
       for (var j = 0; j < studentsConsultations[i].attendees.length; j++) {
-        if (studentsConsultations[i].attendees[j] == userId) {
+        if (studentsConsultations[i].attendees[j] == userId.toString())
           myConsCounter = j;
-        }
       }
 
       consultations = [
@@ -289,10 +289,7 @@ router.get('/student/:token', async (req, res) => {
         },
       ];
     }
-
-    if (studentsConsultations > 0)
-      return res.status(200).send(studentsConsultations[0]);
-    else return res.send({ data: consultations });
+    return res.send({ data: consultations });
   } catch (err) {
     res.status(400).send(err);
   }
