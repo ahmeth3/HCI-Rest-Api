@@ -250,27 +250,29 @@ router.get('/student/:token', async (req, res) => {
       });
 
       if (profCons.length > 0)
-        studentsConsultations = [...studentsConsultations, profCons];
+        for (var j = 0; j < profCons.length; j++)
+          studentsConsultations.push(profCons[j]);
     }
 
     var consultations = [];
-    for (var i = 0; i < studentsConsultations[0].length; i++) {
+
+    for (var i = 0; i < studentsConsultations.length; i++) {
       const prof = await User.findOne({
-        _id: studentsConsultations[0][i].professor,
+        _id: studentsConsultations[i].professor,
       });
 
       consultations = [
         ...consultations,
         {
-          _id: studentsConsultations[0][i]._id,
-          typeOFDate: studentsConsultations[0][i].typeOFDate,
-          day: studentsConsultations[0][i].day,
-          repeatEveryWeek: studentsConsultations[0][i].repeatEveryWeek,
-          date: studentsConsultations[0][i].date,
-          startTime: studentsConsultations[0][i].startTime,
-          endTime: studentsConsultations[0][i].endTime,
-          place: studentsConsultations[0][i].place,
-          professor: studentsConsultations[0][i].professor,
+          _id: studentsConsultations[i]._id,
+          typeOFDate: studentsConsultations[i].typeOFDate,
+          day: studentsConsultations[i].day,
+          repeatEveryWeek: studentsConsultations[i].repeatEveryWeek,
+          date: studentsConsultations[i].date,
+          startTime: studentsConsultations[i].startTime,
+          endTime: studentsConsultations[i].endTime,
+          place: studentsConsultations[i].place,
+          professor: studentsConsultations[i].professor,
           professorName: prof.name + ' ' + prof.surname,
         },
       ];
