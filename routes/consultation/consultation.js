@@ -174,7 +174,7 @@ router.patch('/update/:token', async (req, res) => {
 });
 
 // Delete consultation
-router.get('/delete/:id', async (req, res) => {
+router.post('/delete/:id', async (req, res) => {
   try {
     const deletedConsultation = await Consultation.deleteOne({
       _id: req.params.id,
