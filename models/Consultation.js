@@ -30,6 +30,7 @@ const consultationSchema = new mongoose.Schema({
     required: true,
   },
   professor: { type: mongoose.Schema.Types.ObjectId, ref: 'Professor' },
+  attendees: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
 });
 
 module.exports = mongoose.model('Consultation', consultationSchema);

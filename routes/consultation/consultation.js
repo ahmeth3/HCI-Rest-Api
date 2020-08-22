@@ -82,6 +82,7 @@ router.post('/create/:token', async (req, res) => {
       endTime: data.endTime,
       place: data.place,
       professor: userId,
+      attendees: [null, null, null, null],
     });
 
     const savedConsultation = await consulation.save();
@@ -164,6 +165,7 @@ router.patch('/update/:token', async (req, res) => {
         startTime: data.startTime,
         endTime: data.endTime,
         place: data.place,
+        attendees: [null, null, null, null],
       }
     );
 
@@ -274,6 +276,7 @@ router.get('/student/:token', async (req, res) => {
           place: studentsConsultations[i].place,
           professor: studentsConsultations[i].professor,
           professorName: prof.name + ' ' + prof.surname,
+          attendees: studentsConsultations[i].attendees,
         },
       ];
     }
@@ -281,6 +284,88 @@ router.get('/student/:token', async (req, res) => {
     if (studentsConsultations > 0)
       return res.status(200).send(studentsConsultations[0]);
     else return res.send({ data: consultations });
+  } catch (err) {
+    res.status(400).send(err);
+  }
+});
+
+router.patch('/attend/:token', async (req, res) => {
+  try {
+    // verify the token
+    const verifiedToken = jwt.verify(
+      req.params.token,
+      process.env.TOKEN_SECRET
+    );
+
+    // extract the user id from token
+    var userId = mongoose.Types.ObjectId;
+    userId = mongoose.Types.ObjectId(verifiedToken._id);
+
+    data = req.body;
+
+    const cons = await Consultation.findOne({ _id: data._id });
+
+    var updatedAttendees = cons.attendees;
+
+    updatedAttendees[data.counter] = userId;
+
+    const consultation = await Consultation.updateOne(
+      { _id: data._id },
+      {
+        typeOFDate: data.typeOFDate,
+        day: data.day,
+        repeatEveryWeek: data.repeatEveryWeek,
+        date: data.date,
+        startTime: data.startTime,
+        endTime: data.endTime,
+        place: data.place,
+        attendees: updatedAttendees,
+      }
+    );
+
+    if (consultation) return res.status(200).send('Ažurirano!');
+    else return res.status(400).send('Neuspešno!');
+  } catch (err) {
+    res.status(400).send(err);
+  }
+});
+
+router.patch('/giveUp/:token', async (req, res) => {
+  try {
+    // verify the token
+    const verifiedToken = jwt.verify(
+      req.params.token,
+      process.env.TOKEN_SECRET
+    );
+
+    // extract the user id from token
+    var userId = mongoose.Types.ObjectId;
+    userId = mongoose.Types.ObjectId(verifiedToken._id);
+
+    data = req.body;
+
+    const cons = await Consultation.findOne({ _id: data._id });
+
+    var updatedAttendees = cons.attendees;
+
+    updatedAttendees[data.counter] = null;
+
+    const consultation = await Consultation.updateOne(
+      { _id: data._id },
+      {
+        typeOFDate: data.typeOFDate,
+        day: data.day,
+        repeatEveryWeek: data.repeatEveryWeek,
+        date: data.date,
+        startTime: data.startTime,
+        endTime: data.endTime,
+        place: data.place,
+        attendees: updatedAttendees,
+      }
+    );
+
+    if (consultation) return res.status(200).send('Ažurirano!');
+    else return res.status(400).send('Neuspešno!');
   } catch (err) {
     res.status(400).send(err);
   }
