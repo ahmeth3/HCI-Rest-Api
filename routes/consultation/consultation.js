@@ -174,10 +174,10 @@ router.patch('/update/:token', async (req, res) => {
 });
 
 // Delete consultation
-router.get('/delete', async (req, res) => {
+router.get('/delete/:id', async (req, res) => {
   try {
     const deletedConsultation = await Consultation.deleteOne({
-      _id: req.body._id,
+      _id: req.params.id,
     });
 
     if (deletedConsultation) return res.status(200).send('Uspešno izbrisano!');
