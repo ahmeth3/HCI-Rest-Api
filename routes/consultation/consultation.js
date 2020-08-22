@@ -265,8 +265,8 @@ router.get('/student/:token', async (req, res) => {
 
       var myConsCounter = -1;
       // check if im already signed up for this cons
-      for (var j = 0; j < studentsConsultations.attendees.length; j++) {
-        if (studentsConsultations.attendees[j] == userId) {
+      for (var j = 0; j < studentsConsultations[i].attendees.length; j++) {
+        if (studentsConsultations[i].attendees[j] == userId) {
           myConsCounter = j;
         }
       }
