@@ -255,7 +255,7 @@ router.get('/student/:token', async (req, res) => {
 
     var consultations = [];
     for (var i = 0; i < studentsConsultations[0].length; i++) {
-      const prof = await User.find({
+      const prof = await User.findOne({
         _id: studentsConsultations[0][i].professor,
       });
 
