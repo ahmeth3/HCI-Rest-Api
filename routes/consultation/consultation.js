@@ -153,7 +153,7 @@ router.patch('/update/:token', async (req, res) => {
       }
     }
 
-    const consultation = new Consultation.updateOne(
+    const consultation = await Consultation.updateOne(
       { _id: data._id },
       {
         typeOFDate: data.typeOFDate,
@@ -179,7 +179,8 @@ router.delete('/delete', async (req, res) => {
       _id: req.body._id,
     });
 
-    return res.status(200).send('Uspešno izbrisano!');
+    if (deletedConsultation) return res.status(200).send('Uspešno izbrisano!');
+    else return res.status(400).send('Neuspešno brisanje!');
   } catch (error) {
     return res.status(400).send(error);
   }
