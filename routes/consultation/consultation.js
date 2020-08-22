@@ -9,6 +9,7 @@ const Consultation = require('../../models/Consultation');
 const Subject = require('../../models/Subject');
 const Professor = require('../../models/Professor');
 const Student = require('../../models/Student');
+const User = require('../../models/User');
 
 // Create
 router.post('/create/:token', async (req, res) => {
@@ -252,7 +253,31 @@ router.get('/student/:token', async (req, res) => {
         studentsConsultations = [...studentsConsultations, profCons];
     }
 
-    return res.send({ data: studentsConsultations[0] });
+    var consultations = [];
+    for (var i = 0; i < studentsConsultations[0].length; i++) {
+      const prof = await User.find({
+        _id: studentsConsultations[0][i].professor,
+      });
+
+      consultations = [
+        ...consultations,
+        {
+          _id: studentsConsultations[0][i]._id,
+          typeOFDate: studentsConsultations[0][i].typeOFDate,
+          day: studentsConsultations[0][i].day,
+          repeatEveryWeek: studentsConsultations[0][i].repeatEveryWeek,
+          date: studentsConsultations[0][i].date,
+          startTime: studentsConsultations[0][i].startTime,
+          endTime: studentsConsultations[0][i].endTime,
+          place: studentsConsultations[0][i].place,
+          professor: studentsConsultations[0][i].professor,
+        },
+      ];
+    }
+
+    if (studentsConsultations > 0)
+      return res.status(200).send(studentsConsultations[0]);
+    else return res.send({ data: consultations });
   } catch (err) {
     res.status(400).send(err);
   }
