@@ -263,6 +263,14 @@ router.get('/student/:token', async (req, res) => {
         _id: studentsConsultations[i].professor,
       });
 
+      var myConsCounter = -1;
+      // check if im already signed up for this cons
+      for (var j = 0; j < studentsConsultations.attendees.length; j++) {
+        if (studentsConsultations.attendees[j] == userId) {
+          myConsCounter = j;
+        }
+      }
+
       consultations = [
         ...consultations,
         {
@@ -277,6 +285,7 @@ router.get('/student/:token', async (req, res) => {
           professor: studentsConsultations[i].professor,
           professorName: prof.name + ' ' + prof.surname,
           attendees: studentsConsultations[i].attendees,
+          myConsCounter: myConsCounter,
         },
       ];
     }
