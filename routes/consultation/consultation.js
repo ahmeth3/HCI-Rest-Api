@@ -91,6 +91,100 @@ router.post('/create/:token', async (req, res) => {
   }
 });
 
+// Update consultations info
+router.patch('/update/:token', async (req, res) => {
+  try {
+    // verify the token
+    const verifiedToken = jwt.verify(
+      req.params.token,
+      process.env.TOKEN_SECRET
+    );
+
+    // extract the user id from token
+    var userId = mongoose.Types.ObjectId;
+    userId = mongoose.Types.ObjectId(verifiedToken._id);
+
+    data = req.body;
+
+    // check if user has already created consultation within the time range
+    const cons = await Consultation.find({
+      date: data.date,
+      professor: userId,
+    });
+
+    if (cons) {
+      var errorMessages = [];
+      for (var i = 0; i < cons.length; i++) {
+        var startTime = cons[i].startTime.split(':');
+        var startTimeHour = startTime[0];
+        var startTimeMinute = startTime[1];
+
+        var startTimeMinutes =
+          parseInt(startTimeHour) * 60 + parseInt(startTimeMinute);
+
+        var endTime = cons[i].endTime.split(':');
+        var endTimeHour = endTime[0];
+        var endTimeMinute = endTime[1];
+
+        var endTimeMinutes =
+          parseInt(endTimeHour) * 60 + parseInt(endTimeMinute);
+
+        var testedConsTime = data.startTime.split(':');
+        var testedConsTimeHour = testedConsTime[0];
+        var testedConsTimeMinute = testedConsTime[1];
+
+        var testedConsTimeMinutes =
+          parseInt(testedConsTimeHour) * 60 + parseInt(testedConsTimeMinute);
+
+        if (
+          (testedConsTimeMinutes >= startTimeMinutes &&
+            testedConsTimeMinutes < endTimeMinutes) ||
+          (testedConsTimeMinutes > startTimeMinutes - 120 &&
+            testedConsTimeMinutes <= startTimeMinutes)
+        )
+          errorMessages.push(
+            'Već imate konsultaciju tog dana u periodu od ' +
+              cons[i].startTime +
+              '-' +
+              cons[i].endTime
+          );
+        if (errorMessages.length > 0)
+          return res.status(400).send(errorMessages);
+      }
+    }
+
+    const consultation = new Consultation.updateOne(
+      { _id: data._id },
+      {
+        typeOFDate: data.typeOFDate,
+        day: data.day,
+        repeatEveryWeek: data.repeatEveryWeek,
+        date: data.date,
+        startTime: data.startTime,
+        endTime: data.endTime,
+        place: data.place,
+      }
+    );
+
+    res.status(200).send(consultation);
+  } catch (err) {
+    res.status(400).send(err);
+  }
+});
+
+// Delete consultation
+router.delete('/delete', async (req, res) => {
+  try {
+    const deletedConsultation = await Consultation.deleteOne({
+      _id: req.body._id,
+    });
+
+    return res.status(200).send('Uspešno izbrisano!');
+  } catch (error) {
+    return res.status(400).send(error);
+  }
+});
+
 // Get consultations for professor
 router.get('/professor/:token', async (req, res) => {
   try {
