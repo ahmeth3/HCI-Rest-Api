@@ -166,7 +166,8 @@ router.patch('/update/:token', async (req, res) => {
       }
     );
 
-    res.status(200).send(consultation);
+    if (consultation) return res.status(200).send('Ažurirano!');
+    else return res.status(400).send('Neuspešno!');
   } catch (err) {
     res.status(400).send(err);
   }
