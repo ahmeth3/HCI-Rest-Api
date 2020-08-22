@@ -271,6 +271,7 @@ router.get('/student/:token', async (req, res) => {
           endTime: studentsConsultations[0][i].endTime,
           place: studentsConsultations[0][i].place,
           professor: studentsConsultations[0][i].professor,
+          professorName: prof.name + ' ' + prof.surname,
         },
       ];
     }
