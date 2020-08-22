@@ -312,13 +312,6 @@ router.patch('/attend/:token', async (req, res) => {
     const consultation = await Consultation.updateOne(
       { _id: data._id },
       {
-        typeOFDate: data.typeOFDate,
-        day: data.day,
-        repeatEveryWeek: data.repeatEveryWeek,
-        date: data.date,
-        startTime: data.startTime,
-        endTime: data.endTime,
-        place: data.place,
         attendees: updatedAttendees,
       }
     );
@@ -353,13 +346,6 @@ router.patch('/giveUp/:token', async (req, res) => {
     const consultation = await Consultation.updateOne(
       { _id: data._id },
       {
-        typeOFDate: data.typeOFDate,
-        day: data.day,
-        repeatEveryWeek: data.repeatEveryWeek,
-        date: data.date,
-        startTime: data.startTime,
-        endTime: data.endTime,
-        place: data.place,
         attendees: updatedAttendees,
       }
     );
