@@ -252,7 +252,7 @@ router.get('/student/:token', async (req, res) => {
         studentsConsultations = [...studentsConsultations, profCons];
     }
 
-    return res.send(studentsConsultations);
+    return res.send({ data: studentsConsultations });
   } catch (err) {
     res.status(400).send(err);
   }
