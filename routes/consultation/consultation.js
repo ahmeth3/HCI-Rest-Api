@@ -211,4 +211,51 @@ router.get('/professor/:token', async (req, res) => {
   }
 });
 
+// Get student's consultations
+router.get('/student/:token', async (req, res) => {
+  try {
+    // verify the token
+    const verifiedToken = jwt.verify(
+      req.params.token,
+      process.env.TOKEN_SECRET
+    );
+
+    // extract the user id from token
+    var userId = mongoose.Types.ObjectId;
+    userId = mongoose.Types.ObjectId(verifiedToken._id);
+
+    // Getting students subjects
+    const studentsSubjects = await Subject.find({
+      students: userId,
+    });
+
+    var studentsProfessors = [];
+
+    for (var i = 0; i < studentsSubjects.length; i++) {
+      for (var j = 0; j < studentsSubjects[i].professors.length; j++)
+        if (
+          !studentsProfessors.includes(
+            studentsSubjects[i].professors[j].toString()
+          )
+        )
+          studentsProfessors.push(studentsSubjects[i].professors[j].toString());
+    }
+
+    var studentsConsultations = [];
+
+    for (var i = 0; i < studentsProfessors.length; i++) {
+      const profCons = await Consultation.find({
+        professor: studentsProfessors[i],
+      });
+
+      if (profCons.length > 0)
+        studentsConsultations = [...studentsConsultations, profCons];
+    }
+
+    return res.send(studentsConsultations);
+  } catch (err) {
+    res.status(400).send(err);
+  }
+});
+
 module.exports = router;
