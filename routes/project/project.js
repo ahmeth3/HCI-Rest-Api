@@ -45,10 +45,49 @@ router.post('/create/:token', async (req, res) => {
   }
 });
 
-router.get('/list/:subjectId', async (req, res) => {
-  const projects = await Project.find({ subject: req.params.subjectId });
+router.get('/list/:token', async (req, res) => {
+  try {
+    // verify the token
+    const verifiedToken = jwt.verify(
+      req.params.token,
+      process.env.TOKEN_SECRET
+    );
 
-  return res.status(200).send(projects);
+    // extract the user id from token
+    var userId = mongoose.Types.ObjectId;
+    userId = mongoose.Types.ObjectId(verifiedToken._id);
+
+    data = req.body;
+
+    const projects = await Project.find({ subject: data.subjectId });
+
+    var allProjs = [];
+
+    for (var i = 0; i < projects.length; i++) {
+      var myProj = false;
+      if (projects[i].attendees.includes(userId)) {
+        myProj = true;
+      }
+
+      allProjs = [
+        ...allProjs,
+        {
+          name: projects[i].name,
+          description: projects[i].description,
+          mandatory: projects[i].mandatory,
+          numberOfAttendees: projects[i].numberOfAttendees,
+          points: projects[i].points,
+          attendees: projects[i].attendees,
+          subject: projects[i].subject,
+          myProj: myProj,
+        },
+      ];
+    }
+
+    return res.status(200).send(allProjs);
+  } catch (err) {
+    res.status(400).send(err);
+  }
 });
 
 module.exports = router;
