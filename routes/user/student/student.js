@@ -8,6 +8,7 @@ dotenv.config();
 const Student = require('../../../models/Student');
 const Subject = require('../../../models/Subject');
 const User = require('../../../models/User');
+const Project = require('../../../models/Project');
 
 const {
   updateBasicStudentValidation,
@@ -208,6 +209,74 @@ router.get('/projectSubjects/:token', async (req, res) => {
     }
 
     return res.status(200).send(subj);
+  } catch (err) {
+    res.status(400).send(err);
+  }
+});
+
+router.patch('/attend/:token', async (req, res) => {
+  try {
+    // verify the token
+    const verifiedToken = jwt.verify(
+      req.params.token,
+      process.env.TOKEN_SECRET
+    );
+
+    // extract the user id from token
+    var userId = mongoose.Types.ObjectId;
+    userId = mongoose.Types.ObjectId(verifiedToken._id);
+
+    data = req.body;
+
+    const proj = await Project.findOne({ _id: data._id });
+
+    var updatedAttendees = proj.attendees;
+
+    updatedAttendees.push(userId);
+
+    const project = await Project.updateOne(
+      { _id: data._id },
+      {
+        attendees: updatedAttendees,
+      }
+    );
+
+    if (project) return res.status(200).send('Ažurirano!');
+    else return res.status(400).send('Neuspešno!');
+  } catch (err) {
+    res.status(400).send(err);
+  }
+});
+
+router.patch('/giveUp/:token', async (req, res) => {
+  try {
+    // verify the token
+    const verifiedToken = jwt.verify(
+      req.params.token,
+      process.env.TOKEN_SECRET
+    );
+
+    // extract the user id from token
+    var userId = mongoose.Types.ObjectId;
+    userId = mongoose.Types.ObjectId(verifiedToken._id);
+
+    data = req.body;
+
+    const cons = await Consultation.findOne({ _id: data._id });
+
+    var updatedAttendees = cons.attendees;
+
+    updatedAttendees[data.counter] = null;
+
+    const consultation = await Consultation.updateOne(
+      { _id: data._id },
+      {
+        attendees: updatedAttendees,
+      }
+    );
+
+    if (consultation) return res.status(200).send('Ažurirano!');
+    else return res.status(400).send('Neuspešno!');
   } catch (err) {
     res.status(400).send(err);
   }
