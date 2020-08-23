@@ -207,6 +207,8 @@ router.get('/professor/:token', async (req, res) => {
     var userId = mongoose.Types.ObjectId;
     userId = mongoose.Types.ObjectId(verifiedToken._id);
 
+    const refresh = await refreshDate();
+
     const consultation = await Consultation.find({
       professor: userId,
     });
@@ -221,7 +223,7 @@ router.get('/professor/:token', async (req, res) => {
 // Get student's consultations
 router.get('/student/:token', async (req, res) => {
   try {
-    const idk = await refreshDate();
+    const refresh = await refreshDate();
 
     // verify the token
     const verifiedToken = jwt.verify(
@@ -388,7 +390,7 @@ const refreshDate = async function (data) {
 
           await Consultation.updateOne(
             { _id: allConsultation[i]._id },
-            { date: pom, valid: true }
+            { date: pom, valid: true, attendees: [null, null, null, null] }
           );
         }
       } else {
@@ -407,7 +409,7 @@ const refreshDate = async function (data) {
         if (thisMoment > date) {
           await Consultation.updateOne(
             { _id: allConsultation[i]._id },
-            { valid: false }
+            { valid: false, attendees: [null, null, null, null] }
           );
         }
       }
