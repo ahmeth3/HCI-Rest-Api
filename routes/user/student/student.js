@@ -141,7 +141,7 @@ router.get('/basic-info/:token', async (req, res) => {
 
     if (basicInfoExist.subjects.length > 0)
       return res.status(200).send('Ima basic info');
-    else return res.status(200).send('Nema basic info');
+    return res.status(200).send('Nema basic info');
   } catch (err) {
     res.status(400).send(err);
   }
