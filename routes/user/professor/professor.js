@@ -7,6 +7,7 @@ dotenv.config();
 
 const Professor = require('../../../models/Professor');
 const Subject = require('../../../models/Subject');
+const User = require('../../../models/User');
 
 const {
   updateBasicProfessorValidation,
@@ -127,6 +128,54 @@ router.get('/mySubjects/:token', async (req, res) => {
     const mySubjects = await Subject.find({ professors: userId });
     if (mySubjects) res.status(200).send(mySubjects);
     else res.status(400).send('Nema predmeta!');
+  } catch (err) {
+    res.status(400).send(err);
+  }
+});
+
+// Get professor's subjects for projects
+router.get('/projectSubjects/:token', async (req, res) => {
+  try {
+    const verifiedToken = jwt.verify(
+      req.params.token,
+      process.env.TOKEN_SECRET
+    );
+
+    var userId = mongoose.Types.ObjectId;
+    userId = mongoose.Types.ObjectId(verifiedToken._id);
+
+    const mySubjects = await Subject.find({ professors: userId });
+
+    var subj = [];
+
+    for (var i = 0; i < mySubjects.length; i++) {
+      var profsNames = [];
+      var profs = await User.find({
+        _id: mySubjects[i].professors,
+      });
+
+      for (var j = 0; j < profs.length; j++) {
+        if (!profsNames.includes(profs[j].name + ' ' + profs[j].surname))
+          profsNames.push(profs[j].name + ' ' + profs[j].surname);
+      }
+
+      subj = [
+        ...subj,
+        {
+          _id: mySubjects[i]._id,
+          department: mySubjects[i].department,
+          profile: mySubjects[i].profile,
+          grade: mySubjects[i].grade,
+          students: mySubjects[i].students,
+          professors: mySubjects[i].professors,
+          name: mySubjects[i].name,
+          description: mySubjects[i].description,
+          professorsNames: profsNames,
+        },
+      ];
+    }
+
+    return res.status(200).send(subj);
   } catch (err) {
     res.status(400).send(err);
   }
