@@ -262,20 +262,20 @@ router.patch('/giveUp/:token', async (req, res) => {
 
     data = req.body;
 
-    const cons = await Consultation.findOne({ _id: data._id });
+    const proj = await Project.findOne({ _id: data._id });
 
-    var updatedAttendees = cons.attendees;
+    var updatedAttendees = proj.attendees;
 
-    updatedAttendees[data.counter] = null;
+    updatedAttendees.pop(userId);
 
-    const consultation = await Consultation.updateOne(
+    const project = await Project.updateOne(
       { _id: data._id },
       {
         attendees: updatedAttendees,
       }
     );
 
-    if (consultation) return res.status(200).send('Ažurirano!');
+    if (project) return res.status(200).send('Ažurirano!');
     else return res.status(400).send('Neuspešno!');
   } catch (err) {
     res.status(400).send(err);
