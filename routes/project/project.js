@@ -91,4 +91,51 @@ router.post('/list/:token', async (req, res) => {
   }
 });
 
+router.patch('/update/:token', async (req, res) => {
+  try {
+    // verify the token
+    const verifiedToken = jwt.verify(
+      req.params.token,
+      process.env.TOKEN_SECRET
+    );
+
+    // extract the user id from token
+    var userId = mongoose.Types.ObjectId;
+    userId = mongoose.Types.ObjectId(verifiedToken._id);
+
+    data = req.body;
+
+    const project = await Project.updateOne(
+      { _id: data._id },
+      {
+        name: data.name,
+        description: data.description,
+        mandatory: data.mandatory,
+        numberOfAttendees: data.numberOfAttendees,
+        points: data.points,
+        attendees: data.attendees,
+        subject: data.subject,
+      }
+    );
+
+    if (project) return res.status(200).send('Ažurirano!');
+    else return res.status(400).send('Neuspešno!');
+  } catch (err) {
+    res.status(400).send(err);
+  }
+});
+
+router.post('/delete/:id', async (req, res) => {
+  try {
+    const deletedProject = await Project.deleteOne({
+      _id: req.params.id,
+    });
+
+    if (deletedProject) return res.status(200).send('Uspešno izbrisano!');
+    else return res.status(400).send('Neuspešno brisanje!');
+  } catch (error) {
+    return res.status(400).send(error);
+  }
+});
+
 module.exports = router;
