@@ -80,6 +80,7 @@ router.post('/list/:token', async (req, res) => {
           attendees: projects[i].attendees,
           subject: projects[i].subject,
           myProj: myProj,
+          _id: projects[i]._id,
         },
       ];
     }
