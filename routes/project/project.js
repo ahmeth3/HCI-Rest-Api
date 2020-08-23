@@ -113,7 +113,6 @@ router.patch('/update/:token', async (req, res) => {
         mandatory: data.mandatory,
         numberOfAttendees: data.numberOfAttendees,
         points: data.points,
-        attendees: data.attendees,
         subject: data.subject,
       }
     );
