@@ -117,41 +117,43 @@ router.patch('/update/:token', async (req, res) => {
     if (cons) {
       var errorMessages = [];
       for (var i = 0; i < cons.length; i++) {
-        var startTime = cons[i].startTime.split(':');
-        var startTimeHour = startTime[0];
-        var startTimeMinute = startTime[1];
+        if (cons[i]._id != data._id) {
+          var startTime = cons[i].startTime.split(':');
+          var startTimeHour = startTime[0];
+          var startTimeMinute = startTime[1];
 
-        var startTimeMinutes =
-          parseInt(startTimeHour) * 60 + parseInt(startTimeMinute);
+          var startTimeMinutes =
+            parseInt(startTimeHour) * 60 + parseInt(startTimeMinute);
 
-        var endTime = cons[i].endTime.split(':');
-        var endTimeHour = endTime[0];
-        var endTimeMinute = endTime[1];
+          var endTime = cons[i].endTime.split(':');
+          var endTimeHour = endTime[0];
+          var endTimeMinute = endTime[1];
 
-        var endTimeMinutes =
-          parseInt(endTimeHour) * 60 + parseInt(endTimeMinute);
+          var endTimeMinutes =
+            parseInt(endTimeHour) * 60 + parseInt(endTimeMinute);
 
-        var testedConsTime = data.startTime.split(':');
-        var testedConsTimeHour = testedConsTime[0];
-        var testedConsTimeMinute = testedConsTime[1];
+          var testedConsTime = data.startTime.split(':');
+          var testedConsTimeHour = testedConsTime[0];
+          var testedConsTimeMinute = testedConsTime[1];
 
-        var testedConsTimeMinutes =
-          parseInt(testedConsTimeHour) * 60 + parseInt(testedConsTimeMinute);
+          var testedConsTimeMinutes =
+            parseInt(testedConsTimeHour) * 60 + parseInt(testedConsTimeMinute);
 
-        if (
-          (testedConsTimeMinutes >= startTimeMinutes &&
-            testedConsTimeMinutes < endTimeMinutes) ||
-          (testedConsTimeMinutes > startTimeMinutes - 120 &&
-            testedConsTimeMinutes <= startTimeMinutes)
-        )
-          errorMessages.push(
-            'Već imate konsultaciju tog dana u periodu od ' +
-              cons[i].startTime +
-              '-' +
-              cons[i].endTime
-          );
-        if (errorMessages.length > 0)
-          return res.status(400).send(errorMessages);
+          if (
+            (testedConsTimeMinutes >= startTimeMinutes &&
+              testedConsTimeMinutes < endTimeMinutes) ||
+            (testedConsTimeMinutes > startTimeMinutes - 120 &&
+              testedConsTimeMinutes <= startTimeMinutes)
+          )
+            errorMessages.push(
+              'Već imate konsultaciju tog dana u periodu od ' +
+                cons[i].startTime +
+                '-' +
+                cons[i].endTime
+            );
+          if (errorMessages.length > 0)
+            return res.status(400).send(errorMessages);
+        }
       }
     }
 
@@ -217,23 +219,22 @@ router.get('/professor/:token', async (req, res) => {
 // Get student's consultations
 router.get('/student/:token', async (req, res) => {
   try {
+    // const idk = await refreshDate();
+    // return res.send(idk);
+
     // verify the token
     const verifiedToken = jwt.verify(
       req.params.token,
       process.env.TOKEN_SECRET
     );
-
     // extract the user id from token
     var userId = mongoose.Types.ObjectId;
     userId = mongoose.Types.ObjectId(verifiedToken._id);
-
     // Getting students subjects
     const studentsSubjects = await Subject.find({
       students: userId,
     });
-
     var studentsProfessors = [];
-
     //getam profesore
     for (var i = 0; i < studentsSubjects.length; i++) {
       for (var j = 0; j < studentsSubjects[i].professors.length; j++)
@@ -244,33 +245,26 @@ router.get('/student/:token', async (req, res) => {
         )
           studentsProfessors.push(studentsSubjects[i].professors[j].toString());
     }
-
     var studentsConsultations = [];
-
     //stavljam sve kons mojih prof
     for (var i = 0; i < studentsProfessors.length; i++) {
       const profCons = await Consultation.find({
         professor: studentsProfessors[i],
       });
-
       if (profCons.length > 0)
         for (var j = 0; j < profCons.length; j++)
           studentsConsultations.push(profCons[j]);
     }
-
     var consultations = [];
-
     var myConsCounter = -1;
     for (var i = 0; i < studentsConsultations.length; i++) {
       const prof = await User.findOne({
         _id: studentsConsultations[i].professor,
       });
-
       for (var j = 0; j < studentsConsultations[i].attendees.length; j++) {
         if (studentsConsultations[i].attendees[j] == userId.toString())
           myConsCounter = j;
       }
-
       consultations = [
         ...consultations,
         {
@@ -362,5 +356,40 @@ router.patch('/giveUp/:token', async (req, res) => {
     res.status(400).send(err);
   }
 });
+
+const refreshDate = async function (data) {
+  try {
+    const allConsultation = await Consultation.find();
+
+    var scheduledDate = new Date();
+    scheduledDate.setHours(16);
+    for (var i = 0; i < allConsultation.length; i++) {
+      if (allConsultation[i].repeatEveryWeek) {
+        var thisMoment = new Date();
+        thisMoment.setHours(16);
+
+        var date = new Date(allConsultation[i].date);
+        date.setHours(16);
+
+        if (thisMoment > date) {
+          scheduledDate = scheduledDate.setDate(date.getDate() + 7);
+
+          pom = new Date(scheduledDate);
+          pom.setUTCHours(0, 0, 0, 0);
+          pom.setHours(2);
+
+          await Consultation.updateOne(
+            { _id: allConsultation[i]._id },
+            { date: pom }
+          );
+        }
+      }
+    }
+
+    return 'se;laaama';
+  } catch (err) {
+    return err;
+  }
+};
 
 module.exports = router;
