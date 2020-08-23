@@ -266,12 +266,10 @@ router.patch('/giveUp/:token', async (req, res) => {
 
     var updatedAttendees = proj.attendees;
 
-    updatedAttendees = updatedAttendees.filter((element) => element != userId);
-
     const project = await Project.updateOne(
       { _id: data._id },
       {
-        attendees: updatedAttendees,
+        $pull: { attendees: userId },
       }
     );
 
