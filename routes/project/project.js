@@ -45,4 +45,10 @@ router.post('/create/:token', async (req, res) => {
   }
 });
 
+router.get('/list/:subjectId', async (req, res) => {
+  const projects = await Project.find({ subject: req.params.subjectId });
+
+  return res.status(200).send(projects);
+});
+
 module.exports = router;
