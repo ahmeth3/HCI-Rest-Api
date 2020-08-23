@@ -45,7 +45,7 @@ router.post('/create/:token', async (req, res) => {
   }
 });
 
-router.get('/list/:token', async (req, res) => {
+router.post('/list/:token', async (req, res) => {
   try {
     // verify the token
     const verifiedToken = jwt.verify(
