@@ -7,6 +7,7 @@ dotenv.config();
 
 const Student = require('../../../models/Student');
 const Subject = require('../../../models/Subject');
+const User = require('../../../models/User');
 
 const {
   updateBasicStudentValidation,
