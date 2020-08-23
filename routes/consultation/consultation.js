@@ -83,6 +83,7 @@ router.post('/create/:token', async (req, res) => {
       place: data.place,
       professor: userId,
       attendees: [null, null, null, null],
+      valid: true,
     });
 
     const savedConsultation = await consulation.save();
@@ -168,6 +169,7 @@ router.patch('/update/:token', async (req, res) => {
         endTime: data.endTime,
         place: data.place,
         attendees: [null, null, null, null],
+        valid: true,
       }
     );
 
@@ -219,8 +221,7 @@ router.get('/professor/:token', async (req, res) => {
 // Get student's consultations
 router.get('/student/:token', async (req, res) => {
   try {
-    // const idk = await refreshDate();
-    // return res.send(idk);
+    const idk = await refreshDate();
 
     // verify the token
     const verifiedToken = jwt.verify(
@@ -280,9 +281,12 @@ router.get('/student/:token', async (req, res) => {
           professorName: prof.name + ' ' + prof.surname,
           attendees: studentsConsultations[i].attendees,
           myConsCounter: myConsCounter,
+          valid: studentsConsultations[i].valid,
         },
       ];
     }
+
+    consultations = consultations.filter((element) => element.valid == true);
     return res.send({ data: consultations });
   } catch (err) {
     res.status(400).send(err);
@@ -361,15 +365,19 @@ const refreshDate = async function (data) {
   try {
     const allConsultation = await Consultation.find();
 
-    var scheduledDate = new Date();
-    scheduledDate.setHours(16);
     for (var i = 0; i < allConsultation.length; i++) {
       if (allConsultation[i].repeatEveryWeek) {
+        var scheduledDate = new Date();
         var thisMoment = new Date();
-        thisMoment.setHours(16);
+
+        var chosenStartTime = allConsultation[i].startTime;
+        chosenStartTime = chosenStartTime.split(':');
+        var chosenHour = parseInt(chosenStartTime[0]);
+        var chosenMinutes = parseInt(chosenStartTime[1]);
 
         var date = new Date(allConsultation[i].date);
-        date.setHours(16);
+        date.setHours(chosenHour);
+        date.setMinutes(chosenMinutes);
 
         if (thisMoment > date) {
           scheduledDate = scheduledDate.setDate(date.getDate() + 7);
@@ -380,13 +388,30 @@ const refreshDate = async function (data) {
 
           await Consultation.updateOne(
             { _id: allConsultation[i]._id },
-            { date: pom }
+            { date: pom, valid: true }
+          );
+        }
+      } else {
+        var scheduledDate = new Date();
+        var thisMoment = new Date();
+
+        var chosenStartTime = allConsultation[i].startTime;
+        chosenStartTime = chosenStartTime.split(':');
+        var chosenHour = parseInt(chosenStartTime[0]);
+        var chosenMinutes = parseInt(chosenStartTime[1]);
+
+        var date = new Date(allConsultation[i].date);
+        date.setHours(chosenHour);
+        date.setMinutes(chosenMinutes);
+
+        if (thisMoment > date) {
+          await Consultation.updateOne(
+            { _id: allConsultation[i]._id },
+            { valid: false }
           );
         }
       }
     }
-
-    return 'se;laaama';
   } catch (err) {
     return err;
   }
