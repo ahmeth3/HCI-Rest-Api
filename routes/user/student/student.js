@@ -147,7 +147,7 @@ router.get('/basic-info/:token', async (req, res) => {
   }
 });
 
-// Get professor' subjects
+// Get student's subjects
 router.get('/mySubjects/:token', async (req, res) => {
   try {
     const verifiedToken = jwt.verify(
@@ -166,7 +166,7 @@ router.get('/mySubjects/:token', async (req, res) => {
   }
 });
 
-// Get professor's subjects for projects
+// Get studen's subjects for projects
 router.get('/projectSubjects/:token', async (req, res) => {
   try {
     const verifiedToken = jwt.verify(
@@ -214,6 +214,7 @@ router.get('/projectSubjects/:token', async (req, res) => {
   }
 });
 
+// Accept project
 router.patch('/attend/:token', async (req, res) => {
   try {
     // verify the token
@@ -248,6 +249,7 @@ router.patch('/attend/:token', async (req, res) => {
   }
 });
 
+// Drop project
 router.patch('/giveUp/:token', async (req, res) => {
   try {
     // verify the token
